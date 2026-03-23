@@ -1,12 +1,35 @@
----
+# Sistema de Emissão Distribuída de Boletos Bancários
 
-# 💳 Sistema de Emissão Distribuída de Boletos Bancários (Azure Service Bus & .NET 8)
+## Infraestrutura de Alta Performance com .NET 8 e Azure Service Bus
+📑 1. Introdução e Contexto Estratégico
+Este repositório apresenta uma solução de missão crítica projetada para resolver um dos desafios mais sensíveis do setor de Fintechs e sistemas de ERP: a geração massiva e resiliente de documentos de cobrança (Boletos Bancários).
 
-## 📝 1. Introdução e Contexto
+Em ambientes financeiros de alto volume, a emissão de boletos não é apenas uma tarefa de formatação de dados; é um processo computacionalmente intensivo que envolve cálculos precisos de dígitos verificadores (Linha Digitável e Código de Barras), renderização de buffers complexos de PDF e integrações síncronas ou assíncronas com APIs de registro bancário.
 
-Este projeto implementa uma solução de **missão crítica** para o processamento e geração de boletos bancários em larga escala. Em ecossistemas financeiros, a geração de documentos de cobrança é uma operação que exige alta disponibilidade e consistência eventual, uma vez que depende de cálculos complexos de digitação, geração de buffers de PDF e, por vezes, comunicação com APIs de bancos homologadores.
+1.1. O Problema da Carga Volátil
+Tradicionalmente, sistemas monolíticos sofrem degradação de performance durante janelas de faturamento mensal, onde milhares de requisições de emissão ocorrem simultaneamente. Esse cenário resulta em:
 
-A utilização do **Azure Service Bus** permite que o sistema suporte picos de carga (ex: processamento de faturas mensais) sem degradar a performance da aplicação de interface com o usuário, garantindo que cada solicitação seja processada de forma resiliente.
+Latência Excessiva: O usuário aguarda segundos ou minutos pela geração do PDF.
+
+Timeouts de Conexão: Quedas de serviço devido ao esgotamento de threads no servidor de aplicação.
+
+Inconsistência de Dados: Falhas no meio do processo que deixam o sistema sem saber se o boleto foi ou não registrado no banco.
+
+1.2. A Proposta de Solução: Arquitetura Orientada a Eventos
+Este projeto utiliza o Azure Service Bus como o núcleo de orquestração para implementar o padrão Queue-Based Load Leveling (Nivelamento de Carga Baseado em Fila). Através do desacoplamento total entre o front-end (Producer) e o motor de geração (Consumer), garantimos:
+
+Elasticidade: O sistema absorve picos de carga instantâneos, enfileirando as solicitações para processamento conforme a disponibilidade de recursos.
+
+Resiliência e Tolerância a Falhas: Através de políticas de Retry e Dead Letter Queues (DLQ), asseguramos que nenhuma cobrança seja perdida por instabilidades momentâneas em serviços de terceiros.
+
+Experiência do Usuário (UX): A interface responde de forma instantânea ao cliente, confirmando o recebimento da solicitação, enquanto o processamento ocorre em segundo plano.
+
+1.3. Pilares Tecnológicos
+A stack foi selecionada visando a modernidade e o suporte de longo prazo (LTS):
+
+.NET 8: Aproveitando as melhorias de performance do runtime e as novas APIs de serialização JSON.
+
+Azure Service Bus (Standard/Premium): Utilizado para garantir a entrega de mensagens no estilo at-least-once e suporte a transações atômicas.
 
 ---
 
